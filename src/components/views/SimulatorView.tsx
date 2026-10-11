@@ -124,22 +124,7 @@ const handleScheduleForLater = () => {
     );
   };
 
-  const handleScheduleForLater = () => {
-    addCommitment({
-      title: activeScenario.title,
-      amount: activeScenario.cost,
-      category: activeScenario.category,
-      dueDay: scheduledDay,
-      isPaid: false,
-      isActive: true,
-      note: 'Scheduled via Decision Simulator',
-    });
-    showToast(
-      'Purchase Scheduled 📅',
-      `Reserved ₹${activeScenario.cost} for Day ${scheduledDay}. Safe daily spend rebalanced!`,
-      'info'
-    );
-  };
+ 
 
   const handleSkipPurchase = () => {
     showToast(
