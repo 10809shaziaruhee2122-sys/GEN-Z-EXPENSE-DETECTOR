@@ -189,6 +189,7 @@ export const ProductComparisonStudio: React.FC<ProductComparisonStudioProps> = (
             onClick={handleManualRefresh}
             disabled={isSearchingWeb}
             title="Re-scan internet e-commerce stores"
+            aria-label="Refresh product search"
             className="p-1.5 rounded-xl bg-[#172238] hover:bg-[#202e4c] border border-[#27385a] text-cyan-400 hover:text-cyan-300 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSearchingWeb ? 'animate-spin' : ''}`} />
