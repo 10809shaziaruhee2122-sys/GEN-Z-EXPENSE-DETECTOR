@@ -60,32 +60,40 @@ export const SimulatorView: React.FC = () => {
     setCostInput(activeScenario.cost.toString());
   }, [activeScenario.id]);
 
-  const handleStartNewCustomMove = () => {
-    playLaserSynth();
-    const newCustom: DecisionScenario = {
-      id: `custom-${Date.now()}`,
-      title: 'White Shoes',
-      cost: 2500,
-      category: 'shopping',
-      plannedDay: state.currentDay,
-      isEssential: false,
-      paymentType: 'immediate',
-      tagline: 'Custom internet search move',
-      note: 'Live product search scenario',
-    };
-    setSimulationScenario(newCustom);
-    setCustomTitle('White Shoes');
-    setCostInput('2500');
-    setTimeout(() => {
-      titleInputRef.current?.focus();
-      titleInputRef.current?.select();
-    }, 50);
+  
+const handleScheduleForLater = () => {
+  const day = Math.round(Number(scheduledDay));
+
+  if (
+    !Number.isFinite(day) ||
+    day <= state.currentDay ||
+    day > 30
+  ) {
     showToast(
-      'New Move Created 👟',
-      'Searching internet stores for "White Shoes" at ₹2,500! Type any product name to search.',
-      'info'
+      'Invalid Schedule',
+      `Choose a day between ${state.currentDay + 1} and 30.`,
+      'error'
     );
-  };
+    return;
+  }
+
+  addCommitment({
+    title: activeScenario.title,
+    amount: activeScenario.cost,
+    category: activeScenario.category,
+    dueDay: day,
+    isPaid: false,
+    isActive: true,
+    note: 'Scheduled via Decision Simulator',
+  });
+
+  showToast(
+    'Purchase Scheduled 📅',
+    `Reserved ${formatINR(activeScenario.cost)} for Day ${day}.`,
+    'info'
+  );
+};
+
 
   const handleCostChange = (newCost: number) => {
     const clamped = Math.max(0, Math.min(10000, newCost));
