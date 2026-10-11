@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "MINTMATE — Your Money, Your Moves",
+  "short_name": "MintMate",
+  "description": "Gen Z personal finance simulator and spending decision engine for a ₹10,000 monthly budget.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#080c14",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"]
+}

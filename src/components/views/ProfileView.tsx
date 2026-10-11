@@ -192,6 +192,53 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onOpenEditModal }) => 
           </div>
 
           <form onSubmit={handleQuickSave} className="space-y-4">
+            {/* Quick Preset Chips */}
+            <div>
+              <label className="text-xs font-bold text-gray-300 block mb-1.5">
+                Quick Profile Presets
+              </label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleResetToMintUser}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+                    user?.name === 'mint_user'
+                      ? 'bg-[#00f59b]/20 border-[#00f59b] text-[#00f59b]'
+                      : 'bg-[#141c2e] border-[#222e49] text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <span>😎</span>
+                  <span>mint_user (Default)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingName('Shazia Ruhee');
+                    setEditingEmail('10809shaziaruhee2122@gmail.com');
+                    setEditingAvatar('⚡');
+                    setEditingRole('Hackathon Champion');
+                    updateProfile({
+                      name: 'Shazia Ruhee',
+                      email: '10809shaziaruhee2122@gmail.com',
+                      avatar: '⚡',
+                      role: 'Hackathon Champion',
+                    });
+                    playLaserSynth();
+                    showToast('Preset Loaded ✨', 'Active profile set to Shazia Ruhee', 'success');
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
+                    user?.name === 'Shazia Ruhee'
+                      ? 'bg-purple-500/25 border-purple-400 text-purple-200'
+                      : 'bg-[#141c2e] border-[#222e49] text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <span>⚡</span>
+                  <span>Shazia Ruhee (Participant)</span>
+                </button>
+              </div>
+            </div>
+
             {/* Name Input */}
             <div>
               <label className="text-xs font-bold text-gray-200 block mb-1.5">

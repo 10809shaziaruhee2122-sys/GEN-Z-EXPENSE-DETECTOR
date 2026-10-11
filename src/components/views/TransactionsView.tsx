@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useFinance } from '../../context/FinanceContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatINR } from '../../lib/format-currency';
+import { exportTransactionsCSV } from '../../lib/export-csv';
 import { Transaction, TransactionCategory, TransactionType } from '../../types/finance';
 import {
   Search,
@@ -12,6 +14,8 @@ import {
   ArrowUpRight,
   Receipt,
   Tag,
+  Download,
+  ArrowUpDown,
 } from 'lucide-react';
 
 interface TransactionsViewProps {
@@ -19,10 +23,12 @@ interface TransactionsViewProps {
 }
 
 export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddModal }) => {
-  const { state, deleteTransaction, metrics } = useFinance();
+  const { state, deleteTransaction, metrics, playLaserSynth, showToast } = useFinance();
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'amount-high' | 'amount-low'>('newest');
 
   const filteredTransactions = state.transactions.filter((tx) => {
     const matchesSearch =
@@ -34,6 +40,20 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
 
     return matchesSearch && matchesCategory && matchesType;
   });
+
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+    if (sortBy === 'newest') return b.day - a.day;
+    if (sortBy === 'oldest') return a.day - b.day;
+    if (sortBy === 'amount-high') return b.amount - a.amount;
+    if (sortBy === 'amount-low') return a.amount - b.amount;
+    return 0;
+  });
+
+  const handleExportCSV = () => {
+    playLaserSynth();
+    exportTransactionsCSV(state.transactions, user?.name || 'mint_user');
+    showToast('CSV Exported 📥', `Exported ${state.transactions.length} transactions to CSV.`, 'success');
+  };
 
   const categories = [
     { id: 'all', label: 'All Categories' },
@@ -49,7 +69,7 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
   return (
     <div className="space-y-6 pb-12">
       {/* Top Header & Metrics summary */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-white font-heading tracking-tight">
             Transactions & Cash Moves
@@ -59,13 +79,26 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
           </p>
         </div>
 
-        <button
-          onClick={onOpenAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#00f59b] hover:bg-[#10b981] text-black font-extrabold text-xs shadow-lg transition-all"
-        >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Record Transaction</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#162035] hover:bg-[#1d2a45] border border-[#2b3a5b] text-xs font-bold text-gray-200 hover:text-white transition-all cursor-pointer shadow-md"
+            title="Download CSV spreadsheet"
+            aria-label="Export transactions to CSV"
+          >
+            <Download className="w-4 h-4 text-[#00f59b]" />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={onOpenAddModal}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#00f59b] hover:bg-[#10b981] text-black font-extrabold text-xs shadow-lg transition-all cursor-pointer"
+            aria-label="Record new transaction"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Record Transaction</span>
+          </button>
+        </div>
       </div>
 
       {/* Summary KPI Strip */}
@@ -107,13 +140,14 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-[#101726] border border-[#202c44] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Filter, Search, and Sort Bar */}
+      <div className="p-4 rounded-2xl bg-[#101726] border border-[#202c44] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Search */}
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#172138] border border-[#253456] flex-1 max-w-md">
           <Search className="w-4 h-4 text-gray-400" />
           <input
             type="text"
+            aria-label="Search transactions"
             placeholder="Search by name, place, notes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -121,35 +155,82 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
           />
         </div>
 
-        {/* Categories scrollable pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-          {categories.map((cat) => (
+        {/* Type & Sort controls */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Type filter */}
+          <div className="flex items-center p-1 rounded-xl bg-[#151e33] border border-[#222e49] text-xs">
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-                selectedCategory === cat.id
-                  ? 'bg-purple-600/30 border-purple-500 text-purple-200'
-                  : 'bg-[#151e33] border-[#222e49] text-gray-400 hover:text-white'
+              onClick={() => setSelectedType('all')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                selectedType === 'all' ? 'bg-[#00f59b] text-black shadow-sm' : 'text-gray-400 hover:text-white'
               }`}
             >
-              {cat.label}
+              All
             </button>
-          ))}
+            <button
+              onClick={() => setSelectedType('expense')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                selectedType === 'expense' ? 'bg-rose-500 text-white shadow-sm' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Outflows
+            </button>
+            <button
+              onClick={() => setSelectedType('income')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                selectedType === 'income' ? 'bg-[#00f59b] text-black shadow-sm' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Inflows
+            </button>
+          </div>
+
+          {/* Sort dropdown */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#151e33] border border-[#222e49] text-xs">
+            <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+            <select
+              aria-label="Sort transactions by"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent border-none outline-none text-gray-200 text-xs font-semibold cursor-pointer"
+            >
+              <option value="newest" className="bg-[#101726] text-white">Newest First</option>
+              <option value="oldest" className="bg-[#101726] text-white">Oldest First</option>
+              <option value="amount-high" className="bg-[#101726] text-white">Highest Amount</option>
+              <option value="amount-low" className="bg-[#101726] text-white">Lowest Amount</option>
+            </select>
+          </div>
         </div>
+      </div>
+
+      {/* Categories scrollable pills */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setSelectedCategory(cat.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
+              selectedCategory === cat.id
+                ? 'bg-purple-600/30 border-purple-500 text-purple-200'
+                : 'bg-[#151e33] border-[#222e49] text-gray-400 hover:text-white'
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
       </div>
 
       {/* Transactions List */}
       <div className="rounded-[26px] bg-[#101625] border border-[#202c42] overflow-hidden shadow-xl">
         <div className="divide-y divide-[#1b253b]">
-          {filteredTransactions.length === 0 ? (
+          {sortedTransactions.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
               <Receipt className="w-12 h-12 mx-auto text-gray-600 mb-3" />
               <div className="text-base font-bold text-white">No transactions found</div>
               <p className="text-xs mt-1">Try clearing filters or search term</p>
             </div>
           ) : (
-            filteredTransactions.map((tx) => (
+            sortedTransactions.map((tx) => (
               <div
                 key={tx.id}
                 className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-[#141d30] transition-colors group"
@@ -214,8 +295,9 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({ onOpenAddMod
 
                   <button
                     onClick={() => deleteTransaction(tx.id)}
-                    className="p-2 rounded-xl text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-2 rounded-xl text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                     title="Delete transaction"
+                    aria-label={`Delete transaction ${tx.title}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
