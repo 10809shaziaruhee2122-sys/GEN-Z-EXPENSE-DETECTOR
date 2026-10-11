@@ -57,6 +57,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-[#1b243a]/60 transition-colors"
+          aria-label="Close add transaction dialog"
         >
           <X className="w-5 h-5" />
         </button>
