@@ -147,6 +147,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Notifications */}
             <div className="relative">
               <button
+                aria-label="Notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-2xl bg-[#101726] hover:bg-[#1b263d] border border-[#202c44] text-gray-300 hover:text-white transition-all relative cursor-pointer"
               >
