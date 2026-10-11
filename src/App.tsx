@@ -113,13 +113,14 @@ const MainApp: React.FC = () => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
-                isActive ? 'text-[#00f59b] font-bold' : 'text-gray-400'
-              }`}
-            >
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00f59b] ${
+                  isActive ? 'text-[#00f59b] font-bold' : 'text-gray-400'
+                }`}
+              >
               <Icon className="w-4 h-4" />
               <span className="text-[10px]">{item.label}</span>
             </button>
