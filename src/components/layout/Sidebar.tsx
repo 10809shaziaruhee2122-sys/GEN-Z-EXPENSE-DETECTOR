@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Profile',
       icon: User,
       badge: 'VIP',
-      badgeColor: 'text-[#00f59b]',
+      badgeColor: 'text-emerald-300',
     },
   ];
 
