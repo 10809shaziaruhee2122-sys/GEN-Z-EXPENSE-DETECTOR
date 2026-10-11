@@ -29,7 +29,9 @@ export const MoneyHealthSidebarCard: React.FC<MoneyHealthSidebarCardProps> = ({
           </div>
 
           <button
+            
             onClick={onViewDetails}
+            aria-label="View money health details"
             className="w-7 h-7 rounded-xl bg-[#1a2338] hover:bg-[#25324d] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
           >
             <ArrowUpRight className="w-3.5 h-3.5" />
