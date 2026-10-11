@@ -90,6 +90,7 @@ export const ProductionSettingsModal: React.FC<ProductionSettingsModalProps> = (
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-[#1b253d]/60 transition-colors"
+          aria-label="Close production settings"
         >
           <X className="w-5 h-5" />
         </button>
