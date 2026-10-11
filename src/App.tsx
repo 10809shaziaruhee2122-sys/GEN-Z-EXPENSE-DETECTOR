@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
+import { OverviewView } from './components/views/OverviewView';
 import { FinanceProvider } from './context/FinanceContext';
 import { AuthProvider } from './context/AuthContext';
 import { Sidebar, NavTabId } from './components/layout/Sidebar';
@@ -8,14 +9,49 @@ import { AddTransactionModal } from './components/modals/AddTransactionModal';
 import { ProductionSettingsModal } from './components/modals/ProductionSettingsModal';
 import { EditProfileModal } from './components/modals/EditProfileModal';
 
-import { OverviewView } from './components/views/OverviewView';
-import { SimulatorView } from './components/views/SimulatorView';
-import { TransactionsView } from './components/views/TransactionsView';
-import { GoalsView } from './components/views/GoalsView';
-import { SubscriptionsView } from './components/views/SubscriptionsView';
-import { ForecastView } from './components/views/ForecastView';
-import { HealthView } from './components/views/HealthView';
-import { ProfileView } from './components/views/ProfileView';
+
+const SimulatorView = lazy(() =>
+  import('./components/views/SimulatorView').then((m) => ({
+    default: m.SimulatorView,
+  }))
+);
+
+const TransactionsView = lazy(() =>
+  import('./components/views/TransactionsView').then((m) => ({
+    default: m.TransactionsView,
+  }))
+);
+
+const GoalsView = lazy(() =>
+  import('./components/views/GoalsView').then((m) => ({
+    default: m.GoalsView,
+  }))
+);
+
+const SubscriptionsView = lazy(() =>
+  import('./components/views/SubscriptionsView').then((m) => ({
+    default: m.SubscriptionsView,
+  }))
+);
+
+const ForecastView = lazy(() =>
+  import('./components/views/ForecastView').then((m) => ({
+    default: m.ForecastView,
+  }))
+);
+
+const HealthView = lazy(() =>
+  import('./components/views/HealthView').then((m) => ({
+    default: m.HealthView,
+  }))
+);
+
+const ProfileView = lazy(() =>
+  import('./components/views/ProfileView').then((m) => ({
+    default: m.ProfileView,
+  }))
+);
+
 
 import {
   Menu,
@@ -79,32 +115,45 @@ const MainApp: React.FC = () => {
         </div>
 
         {/* View Content */}
+                
         <main className="flex-1 px-4 lg:px-8 pt-6 pb-20 lg:pb-12 max-w-7xl w-full mx-auto">
-          {activeTab === 'overview' && (
-            <OverviewView
-              onNavigate={(tab) => setActiveTab(tab)}
-              onOpenAddModal={() => setShowAddModal(true)}
-            />
-          )}
-
-          {activeTab === 'simulator' && <SimulatorView />}
-
-          {activeTab === 'transactions' && (
-            <TransactionsView onOpenAddModal={() => setShowAddModal(true)} />
-          )}
-
-          {activeTab === 'goals' && <GoalsView />}
-
-          {activeTab === 'subscriptions' && <SubscriptionsView />}
-
-          {activeTab === 'forecast' && <ForecastView />}
-
-          {activeTab === 'health' && <HealthView />}
-
-          {activeTab === 'profile' && (
-            <ProfileView onOpenEditModal={() => setShowProfileModal(true)} />
-          )}
+          <Suspense
+            fallback={
+              <div
+                className="flex min-h-40 items-center justify-center text-gray-400"
+                role="status"
+              >
+                Loading view...
+              </div>
+            }
+          >
+            {activeTab === 'overview' && (
+              <OverviewView
+                onNavigate={(tab) => setActiveTab(tab)}
+                onOpenAddModal={() => setShowAddModal(true)}
+              />
+            )}
+        
+            {activeTab === 'simulator' && <SimulatorView />}
+        
+            {activeTab === 'transactions' && (
+              <TransactionsView onOpenAddModal={() => setShowAddModal(true)} />
+            )}
+        
+            {activeTab === 'goals' && <GoalsView />}
+        
+            {activeTab === 'subscriptions' && <SubscriptionsView />}
+        
+            {activeTab === 'forecast' && <ForecastView />}
+        
+            {activeTab === 'health' && <HealthView />}
+        
+            {activeTab === 'profile' && (
+              <ProfileView onOpenEditModal={() => setShowProfileModal(true)} />
+            )}
+          </Suspense>
         </main>
+
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
